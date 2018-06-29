@@ -49,7 +49,7 @@ armarParesFila :: TablutCasillero -> NumeroFila -> Fila -> [(NumeroFila,NumeroCo
 armarParesFila casillero x filaEntera = map (\y -> (x,y)) (findIndices (==casillero ) filaEntera) --findindices se encarga de dado una fila y un predicado devuelve los indices de los elementos que cumplan el predicado. ejemplo tengo una ficha blanca en una fila y me devuelve la posicion x y de esa ficha blanca en esa fila
 
 movimientosArriba :: Tablero -> Posicion -> [Posicion] --esta funcion recibe un tablero y la posicion de una ficha y me dice que movimientos hacia arriba puede hacer en una lista de posibles posiciones
-movimientosArriba table (x,y) = if (y -1) < 0 then [] else takeWhile (isEmpty table) (map (\posY -> (x,posY))[(y-1)..0])
+movimientosArriba table (x,y) = if (y -1) < 0 then [] else takeWhile (isEmpty table) (map (\posY -> (x,posY))[0..(y-1)])
 --el y-1 hasta 0 representa en una columna, estando en una posicion y, las posiciones posibles hacia arriba hasta 0
 --el map le agrega el numero de la fila a todas las posiciones "y"
 --el takewhile se queda con todas las posiciones que son empty hasta encontrarse con una ficha, ahi para.
@@ -61,7 +61,7 @@ movimientosDerecha :: Tablero -> Posicion -> [Posicion]
 movimientosDerecha  tablett (x,y) = if (x+1) > 8 then [] else takeWhile (isEmpty tablett) (map (\posX -> (posX,y))[(x+1)..8])
 
 movimientosIzquierda :: Tablero -> Posicion -> [Posicion]
-movimientosIzquierda tablettt (x,y) = if (x-1) < 0 then [] else takeWhile (isEmpty tablettt) (map (\posX -> (posX,y))[(x-1)..0])
+movimientosIzquierda tablettt (x,y) = if (x-1) < 0 then [] else takeWhile (isEmpty tablettt) (map (\posX -> (posX,y))[0..(x-1)])
 
 todosLosMovimientos :: Tablero -> Posicion ->[Posicion]
 todosLosMovimientos tabb pos  = movimientosIzquierda tabb pos ++ movimientosDerecha tabb pos ++ movimientosArriba tabb pos ++ movimientosAbajo tabb pos
@@ -78,3 +78,12 @@ asociarMovimientos inicial finales = map (\final -> (inicial,final)) (finales)
 
 actions :: TablutGame -> [(TablutPlayer, [TablutAction])]
 actions  (TG tableroo ShieldPlayer) = [(ShieldPlayer, concat (map (\posFicha -> asociarMovimientos posFicha (todosLosMovimientos tableroo posFicha))(concat (map (\numFila -> armarParesFila PeonBlanco numFila (tableroo !! numFila) ) [0..8])))), (SwordPlayer, [])]
+actions  (TG tableroo SwordPlayer) = [(SwordPlayer, concat (map (\posFicha -> asociarMovimientos posFicha (todosLosMovimientos tableroo posFicha))(concat (map (\numFila -> armarParesFila PeonNegro numFila (tableroo !! numFila) ) [0..8])))), (ShieldPlayer, [])]
+
+next :: TablutGame -> (TablutPlayer, TablutAction) -> TablutGame
+next (TG tableroo player) (actionPlayer, action)
+	| player /= acitonPlayer = error "No es el turno de este jugador"
+	| otherwise = (TablutGame tablerooMod nextPlayer)
+	where
+		nextPlayer = if player == SwordPlayer then ShieldPlayer else SwordPlayer
+		tablerooMod =
